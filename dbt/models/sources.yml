@@ -1,0 +1,48 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: "Raw data loaded by the ingestion pipeline (Dagster assets)"
+    tables:
+      - name: partb_by_provider_service
+        description: >
+          CMS Medicare Physician & Other Practitioners — one row per
+          provider-NPI × HCPCS code × place-of-service. Contains billing
+          volumes, charges, and payments.
+        columns:
+          - name: Rndrng_NPI
+            description: "Rendering provider National Provider Identifier (10-digit)"
+          - name: HCPCS_Cd
+            description: "Healthcare Common Procedure Coding System code"
+          - name: Tot_Srvcs
+            description: "Total number of services provided"
+          - name: Tot_Benes
+            description: "Total number of unique Medicare beneficiaries"
+          - name: Avg_Mdcr_Pymt_Amt
+            description: "Average Medicare payment amount"
+
+      - name: leie_exclusions
+        description: >
+          OIG List of Excluded Individuals/Entities. Providers excluded
+          from federal healthcare programs. Used as fraud labels (imperfect —
+          exclusion ≠ fraud, but it's the best public signal).
+        columns:
+          - name: NPI
+            description: "National Provider Identifier (may be blank for older records)"
+          - name: EXCLTYPE
+            description: "Exclusion authority code (e.g., 1128a(1))"
+          - name: EXCLDATE
+            description: "Date of exclusion"
+
+      - name: nppes_providers
+        description: >
+          NPPES NPI Registry extract — provider demographics, specialty
+          taxonomy codes, and practice locations.
+        columns:
+          - name: npi
+            description: "National Provider Identifier"
+          - name: taxonomy_code
+            description: "Healthcare Provider Taxonomy Code (primary)"
+          - name: practice_state
+            description: "State of primary practice location"

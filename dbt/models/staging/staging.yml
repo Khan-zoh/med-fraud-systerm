@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: stg_partb_claims
+    description: >
+      Cleaned Part B billing data — one row per provider × HCPCS code ×
+      place of service. All columns cast to proper types, whitespace trimmed,
+      rows without NPIs filtered out.
+    columns:
+      - name: npi
+        description: "Rendering provider NPI (10-digit)"
+        tests:
+          - not_null
+      - name: hcpcs_code
+        description: "HCPCS procedure code"
+        tests:
+          - not_null
+      - name: total_services
+        description: "Total number of services for this NPI × HCPCS combination"
+        tests:
+          - not_null
+      - name: total_beneficiaries
+        description: "Total unique Medicare beneficiaries served"
+        tests:
+          - not_null
+      - name: provider_state
+        description: "Provider state abbreviation"
+        tests:
+          - not_null
+      - name: provider_type
+        description: "CMS provider specialty type"
+      - name: entity_type
+        description: "I = individual, O = organization"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['I', 'O']
+      - name: place_of_service
+        description: "F = facility, O = office"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['F', 'O']
+
+  - name: stg_leie_exclusions
+    description: >
+      Cleaned LEIE exclusions — only records with valid 10-digit NPIs.
+      Note: many LEIE entries predate the NPI system and are excluded here.
+    columns:
+      - name: npi
+        description: "Provider NPI"
+        tests:
+          - not_null
+          - unique
+      - name: exclusion_type
+        description: "OIG exclusion authority code"
+        tests:
+          - not_null
+      - name: exclusion_date
+        description: "Date the provider was excluded"
+      - name: is_currently_excluded
+        description: "True if no reinstatement date exists"
+        tests:
+          - not_null
+
+  - name: stg_nppes_providers
+    description: >
+      Cleaned NPPES provider registry — demographics, taxonomy,
+      and practice location.
+    columns:
+      - name: npi
+        description: "National Provider Identifier"
+        tests:
+          - not_null
+          - unique
+      - name: entity_type
+        description: "individual, organization, or unknown"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['individual', 'organization', 'unknown']
+      - name: primary_taxonomy_code
+        description: "Healthcare Provider Taxonomy Code (primary specialization)"
+      - name: practice_state
+        description: "State of primary practice location"

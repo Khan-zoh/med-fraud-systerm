@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: mart_provider_features
+    description: >
+      ML-ready feature table — one row per provider with all engineered
+      features, peer benchmarks, and the LEIE exclusion label. This is
+      the primary input to the modeling pipeline (Phase 5).
+
+      Features are grounded in industrial engineering principles:
+      - SPC z-scores (control chart logic against specialty peers)
+      - Peer benchmarking ratios (vs. specialty median)
+      - Billing velocity / throughput analysis
+      - Upcoding indicators (high-complexity code ratios)
+    columns:
+      - name: npi
+        description: "Provider NPI — primary key"
+        tests:
+          - not_null
+          - unique
+      - name: provider_specialty
+        description: "CMS provider specialty type"
+        tests:
+          - not_null
+      - name: total_services
+        description: "Total services billed"
+        tests:
+          - not_null
+      - name: is_excluded
+        description: "LEIE exclusion flag (supervised learning label)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+      - name: zscore_total_services
+        description: >
+          Z-score of total services vs. specialty peer group mean.
+          Interpretation: values beyond ±3 are 'out of control' in SPC terms.
+      - name: ratio_services_vs_median
+        description: >
+          Ratio of provider's total services to specialty median.
+          Values >> 1 indicate far-above-peer billing volume.
+      - name: upcoding_ratio_vs_peers
+        description: >
+          Provider's high-complexity code ratio divided by peer group average.
+          Values >> 1 suggest possible upcoding.
+      - name: high_complexity_ratio
+        description: "Fraction of services from high-complexity E&M codes"
+      - name: is_above_p95_volume
+        description: "True if provider's volume exceeds the 95th percentile for their specialty"
+      - name: is_above_p99_volume
+        description: "True if provider's volume exceeds the 99th percentile for their specialty"

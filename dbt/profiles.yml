@@ -1,0 +1,7 @@
+cms_fwa:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "../data/cms_fwa.duckdb"
+      threads: 4

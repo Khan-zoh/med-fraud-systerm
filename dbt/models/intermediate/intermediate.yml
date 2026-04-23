@@ -1,0 +1,79 @@
+version: 2
+
+models:
+  - name: int_provider_claims_summary
+    description: >
+      Provider-level aggregation of Part B claims. One row per NPI with
+      total volume, revenue, billing intensity, and service mix metrics.
+    columns:
+      - name: npi
+        description: "Provider NPI — unique at this grain"
+        tests:
+          - not_null
+          - unique
+      - name: total_services
+        description: "Total services across all HCPCS codes"
+        tests:
+          - not_null
+      - name: total_beneficiaries
+        description: "Total unique beneficiaries served"
+        tests:
+          - not_null
+      - name: services_per_beneficiary
+        description: "Average services per beneficiary (billing intensity)"
+
+  - name: int_provider_enriched
+    description: >
+      Provider claims summary joined with NPPES (taxonomy/specialty) and
+      LEIE (exclusion flag). This is the single enriched provider record.
+    columns:
+      - name: npi
+        description: "Provider NPI"
+        tests:
+          - not_null
+          - unique
+      - name: is_excluded
+        description: "True if provider appears in LEIE (our label for supervised ML)"
+        tests:
+          - not_null
+      - name: provider_specialty
+        description: "CMS provider type (coalesced with NPPES taxonomy)"
+        tests:
+          - not_null
+
+  - name: int_provider_hcpcs_mix
+    description: >
+      Provider × HCPCS code service distribution. Each row shows what
+      fraction of a provider's services come from a given procedure code.
+      Used for Jensen-Shannon divergence (peer benchmarking) and upcoding detection.
+    columns:
+      - name: npi
+        description: "Provider NPI"
+        tests:
+          - not_null
+      - name: hcpcs_code
+        description: "HCPCS procedure code"
+        tests:
+          - not_null
+      - name: hcpcs_fraction
+        description: "Fraction of provider's total services from this code (0-1)"
+      - name: is_high_complexity
+        description: "True for E&M codes associated with upcoding risk"
+        tests:
+          - not_null
+
+  - name: int_specialty_benchmarks
+    description: >
+      Peer group statistics per specialty. Mean, std, median, and percentiles
+      for key metrics. Used as control chart parameters for SPC z-scores.
+      Only specialties with >= 10 providers are included.
+    columns:
+      - name: specialty
+        description: "CMS provider specialty type"
+        tests:
+          - not_null
+          - unique
+      - name: peer_count
+        description: "Number of providers in this specialty peer group"
+        tests:
+          - not_null
