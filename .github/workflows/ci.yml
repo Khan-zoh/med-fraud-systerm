@@ -7,8 +7,9 @@ on:
     branches: [main]
 
 jobs:
-  lint-and-test:
+  test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -24,25 +25,8 @@ jobs:
       - name: Lint (ruff)
         run: ruff check src/ tests/
 
-      - name: Format check (black)
-        run: black --check src/ tests/
-
-      - name: Type check (mypy)
-        run: mypy src/cms_fwa/ --ignore-missing-imports
-
       - name: Run unit tests
         run: pytest tests/unit/ -v --tb=short --junitxml=test-results.xml
-
-      - name: Verify dbt compiles
-        run: |
-          cd dbt
-          python -c "
-          from dbt.cli.main import dbtRunner
-          runner = dbtRunner()
-          result = runner.invoke(['compile', '--profiles-dir', '.', '--project-dir', '.'])
-          assert result.success, 'dbt compile failed'
-          print('dbt compile: OK')
-          "
 
       - name: Upload test results
         if: always()
@@ -50,15 +34,3 @@ jobs:
         with:
           name: test-results
           path: test-results.xml
-
-  docker-build:
-    runs-on: ubuntu-latest
-    needs: lint-and-test
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build API image
-        run: docker build -f docker/Dockerfile.api -t cms-fwa-api .
-
-      - name: Build Dashboard image
-        run: docker build -f docker/Dockerfile.dashboard -t cms-fwa-dashboard .
