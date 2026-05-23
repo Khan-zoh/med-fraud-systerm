@@ -7,6 +7,16 @@ An end-to-end machine learning system that identifies anomalous billing patterns
 
 ---
 
+## Dashboard
+
+![Overview — Risk Tier & Score Distribution](docs/screenshots/dashboard_overview.png)
+*Overview page: 30K+ providers scored across 5 risk tiers (Low → Critical), with risk score distribution and key metrics including total providers, LEIE-excluded count, and model PR-AUC.*
+
+![Model Layer Contributions & Top-Risk Providers](docs/screenshots/dashboard_providers.png)
+*Model layer breakdown showing each ensemble component's contribution to the top-100 risk scores, plus the top 20 highest-risk providers ranked by composite score.*
+
+---
+
 ## Architecture
 
 ```
@@ -179,6 +189,59 @@ This project applies **industrial engineering** principles to healthcare fraud d
 - **Layer 2 (Supervised):** Learns from known exclusions; handles class imbalance via SMOTE/class weights
 - **Layer 3 (Graph):** Detects coordinated fraud rings via provider-procedure network analysis
 - **Evaluation:** Precision@k (investigator capacity), PR-AUC (class imbalance), per-specialty breakdowns
+
+## Model Performance — Honest Reporting
+
+| Metric | Before label expansion | After Phase A label expansion |
+|---|---:|---:|
+| Labeled positives (test set) | 6 | 56 |
+| Class imbalance | 1 : 5,015 | 1 : 537 |
+| ROC-AUC (overall) | 0.69 | 0.53 |
+| PR-AUC (overall) | 0.0019 | 0.0022 |
+| Precision @ top 1% | 0.33% | 0.33% |
+| Lift @ top 1% | 16.7× | 1.8× |
+
+**What Phase A fixed:** Earlier evaluation was statistically meaningless because
+only 6 positives existed in the test set. The tiered LEIE matcher (see
+`docs/labeling-methodology.md`) lifted that to 56, making per-tier
+breakdowns and proper precision/recall curves trustworthy.
+
+**What Phase A did NOT fix — and why:** The expanded label set revealed a
+fundamental mismatch between the features and the labels.
+
+- The **features** detect billing-volume / pattern outliers (z-scores,
+  peer deviations, throughput, upcoding ratios).
+- The **labels** capture OIG exclusions, which include controlled-substance
+  convictions, license revocations, defaulted student loans, and other
+  non-billing-related misconduct — not just Medicare-billing fraud.
+
+Filtering labels to fraud-related EXCLTYPE codes (1128a1, 1128a3, 1128b6,
+1128b7) and to providers with > $5K in billings did not recover signal
+(ROC-AUC 0.57 → still essentially random).
+
+**What the model actually does well — and the honest framing:** Acting as a
+**peer-relative outlier detector / triage tool**. Sanity check on the top 25
+risk-scored providers:
+
+| Top-25 metric | Value | vs population |
+|---|---:|---:|
+| Median Medicare payments | $1.02M | **40.7× population median** |
+| Median services | 4,966 | 11.9× |
+| Median services/beneficiary | 5.0 | 3.6× |
+| Median z(services) | 0.61 | top quartile |
+
+The system surfaces extreme statistical outliers — the kind of providers
+CMS analysts triage in practice. Whether any individual flagged provider is
+"fraudulent" is a downstream investigative question.
+
+**Future work to actually predict OIG exclusions:**
+- Replace LEIE with a healthcare-billing-fraud-specific label source (CMS
+  payment suspensions, DOJ healthcare-fraud strike-force takedowns, OIG
+  enforcement-action press releases).
+- Add temporal features (year-over-year billing growth, sudden HCPCS-code
+  shifts) — current features are point-in-time.
+- Pivot evaluation to unsupervised quality metrics (silhouette of flagged
+  vs unflagged in feature space, manual review of top-N precision).
 
 ## Important Caveats
 
