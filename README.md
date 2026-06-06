@@ -1,8 +1,8 @@
 # Medicare Provider FWA Detection System
 
-> **🟢 Live demo:** _[deployment in progress — URL coming once Streamlit Cloud finishes building]_
+> **🟢 Live demo:** [med-fraud-systerm-8q2mvujs8rzcbrcw7zpbkc.streamlit.app](https://med-fraud-systerm-8q2mvujs8rzcbrcw7zpbkc.streamlit.app/)
 >
-> Interactive investigator dashboard powered by the precomputed risk table from this pipeline.
+> Interactive investigator dashboard powered by the precomputed risk table from this pipeline. No DuckDB or ML runtime dependency at the edge — the app reads `artifacts/risk_table.parquet` (4.5 MB, 30K scored providers).
 
 An end-to-end machine learning system that identifies anomalous billing patterns in Medicare Part B claims data, flagging providers for Fraud, Waste, and Abuse (FWA) review. Built with industrial engineering principles — statistical process control, peer benchmarking, and throughput analysis — applied to healthcare claims data.
 
