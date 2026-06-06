@@ -1,0 +1,151 @@
+{
+  "model": "ensemble",
+  "n_test": 30091,
+  "n_positive": 25,
+  "pr_auc": 0.0010035780556761412,
+  "precision_at_k": {
+    "10": 0.0,
+    "25": 0.0,
+    "50": 0.0,
+    "100": 0.0,
+    "200": 0.0,
+    "500": 0.0
+  },
+  "per_specialty": [
+    {
+      "specialty": "Speech Language Pathologist",
+      "n_providers": 42,
+      "n_excluded": 1,
+      "exclusion_rate": 0.023809523809523808,
+      "pr_auc": 0.07692307692307693,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Pulmonary Disease",
+      "n_providers": 238,
+      "n_excluded": 1,
+      "exclusion_rate": 0.004201680672268907,
+      "pr_auc": 0.04,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Neurology",
+      "n_providers": 395,
+      "n_excluded": 1,
+      "exclusion_rate": 0.002531645569620253,
+      "pr_auc": 0.018867924528301886,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Allergy/ Immunology",
+      "n_providers": 80,
+      "n_excluded": 1,
+      "exclusion_rate": 0.0125,
+      "pr_auc": 0.012658227848101266,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Hematology-Oncology",
+      "n_providers": 205,
+      "n_excluded": 1,
+      "exclusion_rate": 0.004878048780487805,
+      "pr_auc": 0.006578947368421052,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Diagnostic Radiology",
+      "n_providers": 784,
+      "n_excluded": 2,
+      "exclusion_rate": 0.002551020408163265,
+      "pr_auc": 0.005671831481030799,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Ophthalmology",
+      "n_providers": 428,
+      "n_excluded": 1,
+      "exclusion_rate": 0.002336448598130841,
+      "pr_auc": 0.0055248618784530384,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Physical Medicine and Rehabilitation",
+      "n_providers": 221,
+      "n_excluded": 1,
+      "exclusion_rate": 0.004524886877828055,
+      "pr_auc": 0.005076142131979695,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Anesthesiology",
+      "n_providers": 998,
+      "n_excluded": 3,
+      "exclusion_rate": 0.003006012024048096,
+      "pr_auc": 0.004326260094681147,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "General Surgery",
+      "n_providers": 520,
+      "n_excluded": 1,
+      "exclusion_rate": 0.0019230769230769232,
+      "pr_auc": 0.004,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Family Practice",
+      "n_providers": 2221,
+      "n_excluded": 3,
+      "exclusion_rate": 0.0013507429085997298,
+      "pr_auc": 0.003879899488866758,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Certified Registered Nurse Anesthetist (CRNA)",
+      "n_providers": 980,
+      "n_excluded": 1,
+      "exclusion_rate": 0.0010204081632653062,
+      "pr_auc": 0.003367003367003367,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Emergency Medicine",
+      "n_providers": 1298,
+      "n_excluded": 2,
+      "exclusion_rate": 0.0015408320493066256,
+      "pr_auc": 0.002389716056899319,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Physician Assistant",
+      "n_providers": 2465,
+      "n_excluded": 3,
+      "exclusion_rate": 0.0012170385395537525,
+      "pr_auc": 0.0020419261542963,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Optometry",
+      "n_providers": 915,
+      "n_excluded": 1,
+      "exclusion_rate": 0.001092896174863388,
+      "pr_auc": 0.0014005602240896359,
+      "precision_at_10": 0.0
+    },
+    {
+      "specialty": "Nurse Practitioner",
+      "n_providers": 4723,
+      "n_excluded": 2,
+      "exclusion_rate": 0.0004234596654668643,
+      "pr_auc": 0.0008842966132626687,
+      "precision_at_10": 0.0
+    }
+  ],
+  "top_5pct_analysis": {
+    "threshold": 32.773145738297075,
+    "flagged": 1505,
+    "true_positives": 0,
+    "false_positives": 1505,
+    "precision": 0.0
+  }
+}
