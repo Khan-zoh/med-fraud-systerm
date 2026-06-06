@@ -46,3 +46,26 @@ sources:
             description: "Healthcare Provider Taxonomy Code (primary)"
           - name: practice_state
             description: "State of primary practice location"
+
+  - name: matched_labels
+    schema: main
+    description: >
+      Curated provider exclusion labels produced by the Python LEIE matcher
+      (src/cms_fwa/ingestion/leie_matcher.py). See docs/labeling-methodology.md
+      for tier definitions, audit results, and FP-rate estimates.
+    tables:
+      - name: provider_exclusion_labels
+        description: >
+          One row per NPI labeled as excluded. Multi-tier match provenance:
+          T1 = NPI exact, T2 = name+state exact, T3 = name fuzzy.
+        columns:
+          - name: npi
+            description: "National Provider Identifier (10-digit, stored as varchar)"
+          - name: is_excluded
+            description: "Always true in this table (positive-only label set)"
+          - name: match_tier
+            description: "Match confidence tier (1=highest, 3=fuzzy)"
+          - name: similarity_score
+            description: "Fuzzy match score 0-100 (100 = exact)"
+          - name: exclusion_date_parsed
+            description: "Earliest LEIE EXCLDATE for this NPI, parsed to date"

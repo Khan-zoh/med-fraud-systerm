@@ -57,10 +57,58 @@ def load_feature_table() -> pd.DataFrame:
     return df
 
 
+# LEIE EXCLTYPE codes that correspond to healthcare-fraud / billing-fraud
+# convictions. Other codes (controlled-substance, license revocation,
+# defaulted student loans) are excluded because the features detect billing
+# anomalies, not generic provider misconduct.
+#   1128a1  -- conviction of program-related crime (fraud / theft)
+#   1128a3  -- conviction relating to healthcare fraud
+#   1128Aa  -- civil monetary penalty for fraud
+#   1128b6  -- claims for excessive charges / unnecessary services
+#   1128b7  -- fraud, kickbacks, or other prohibited activities
+FRAUD_RELEVANT_EXCLTYPES = {"1128a1", "1128a3", "1128Aa", "1128b6", "1128b7"}
+
+# Drop labeled positives below this billing threshold — the features cannot
+# distinguish them from background noise and they pollute training.
+MIN_PAYMENTS_FOR_LABEL = 5_000.0
+
+
+def _apply_label_filters(df: pd.DataFrame, filter_fraud_only: bool, min_payments: float) -> pd.DataFrame:
+    """Demote labels that the features cannot meaningfully learn from."""
+    if not filter_fraud_only and min_payments <= 0:
+        return df
+
+    from cms_fwa.utils.db import get_connection
+    with get_connection() as conn:
+        excltype = conn.execute(
+            "SELECT cast(npi as varchar) as npi, exclusion_type as _excl_type FROM main.provider_exclusion_labels"
+        ).fetchdf()
+
+    df = df.copy()
+    df["npi"] = df["npi"].astype(str)
+    df = df.merge(excltype, on="npi", how="left")
+
+    n_pos_before = int(df["is_excluded"].sum())
+    if filter_fraud_only:
+        keep_label = df["_excl_type"].isin(FRAUD_RELEVANT_EXCLTYPES)
+        df.loc[df["is_excluded"] & ~keep_label, "is_excluded"] = False
+    if min_payments > 0:
+        below = df["is_excluded"] & (df["total_medicare_payments"].fillna(0) < min_payments)
+        df.loc[below, "is_excluded"] = False
+    n_pos_after = int(df["is_excluded"].sum())
+    logger.info(
+        f"Label filter: {n_pos_before} -> {n_pos_after} positives "
+        f"(fraud_only={filter_fraud_only}, min_payments=${min_payments:,.0f})"
+    )
+    return df
+
+
 def prepare_dataset(
     df: pd.DataFrame | None = None,
     test_size: float = 0.2,
     random_state: int = 42,
+    filter_fraud_only: bool = True,
+    min_payments: float = MIN_PAYMENTS_FOR_LABEL,
 ) -> ModelDataset:
     """Prepare train/test datasets for modeling.
 
@@ -68,12 +116,17 @@ def prepare_dataset(
         df: Feature table. If None, loads from DuckDB.
         test_size: Fraction of data for test set.
         random_state: Random seed for reproducibility.
+        filter_fraud_only: Keep only labels with fraud-relevant EXCLTYPE.
+        min_payments: Demote labels below this billing volume (features
+            cannot distinguish low-volume providers from background noise).
 
     Returns:
         ModelDataset with train/test splits.
     """
     if df is None:
         df = load_feature_table()
+
+    df = _apply_label_filters(df, filter_fraud_only, min_payments)
 
     # Identify available feature columns
     available_features = [c for c in ML_FEATURE_COLUMNS if c in df.columns]

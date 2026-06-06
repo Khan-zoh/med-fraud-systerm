@@ -165,7 +165,11 @@ features as (
         p.is_excluded,
         p.exclusion_type,
         p.exclusion_date,
-        p.is_currently_excluded
+        p.is_currently_excluded,
+        -- Match provenance from the LEIE matcher (see docs/labeling-methodology.md)
+        -- T1 = NPI exact, T2 = name+state exact, T3 = fuzzy
+        p.exclusion_match_tier,
+        p.exclusion_match_score
 
     from providers p
     left join benchmarks b
